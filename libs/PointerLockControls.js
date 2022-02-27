@@ -76,17 +76,10 @@ class PointerLockControls extends EventDispatcher {
 
 		}
 
-		function onPointerlockError() {
-
-			console.error( 'THREE.PointerLockControls: Unable to use Pointer Lock API' );
-
-		}
-
 		this.connect = function () {
 
 			scope.domElement.ownerDocument.addEventListener( 'mousemove', onMouseMove );
 			scope.domElement.ownerDocument.addEventListener( 'pointerlockchange', onPointerlockChange );
-			scope.domElement.ownerDocument.addEventListener( 'pointerlockerror', onPointerlockError );
 
 		};
 
@@ -94,7 +87,6 @@ class PointerLockControls extends EventDispatcher {
 
 			scope.domElement.ownerDocument.removeEventListener( 'mousemove', onMouseMove );
 			scope.domElement.ownerDocument.removeEventListener( 'pointerlockchange', onPointerlockChange );
-			scope.domElement.ownerDocument.removeEventListener( 'pointerlockerror', onPointerlockError );
 
 		};
 
