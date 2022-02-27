@@ -8,8 +8,46 @@ import { SetupFloor } from './src/floor.js'
 import { SetupSkybox } from './src/skybox.js'
 
 import * as Materials from './src/materials.js'
+import { io } from "./libs/socket.js";
 
-let x = io.connect("http://localhost:3000")
+const socket = io("http://ec2-3-25-160-234.ap-southeast-2.compute.amazonaws.com:3000")
+const others = new Map()
+
+socket.on("post", (s) => {
+  const other = new THREE.Mesh( new THREE.BoxGeometry(), Materials.RedMaterial)
+  scene.add( other )
+
+  others.set(s.id, other)
+});
+
+socket.on("put", (s) => {
+  if (!others.has(s.id)) {
+    const other = new THREE.Mesh( new THREE.BoxGeometry(), Materials.RedMaterial)
+    scene.add( other )
+
+    others.set(s.id, other)
+  }
+  
+  let other = others.get(s.id)
+  other.position.set(
+    s.payload.position.x, 
+    s.payload.position.y, 
+    s.payload.position.z
+  )
+
+  other.rotation.set(
+    s.payload.rotation.x, 
+    s.payload.rotation.y, 
+    s.payload.rotation.z
+  )
+});
+
+socket.on("disconnect", (socket) => {
+  if (others.has(socket.id)) {
+    scene.remove(others.get(socket.id))
+    others.delete(socket.id)
+  }
+});
 
 const scene = new THREE.Scene()
 
@@ -75,6 +113,22 @@ function animate() {
     controls.moveForward(-cameraDelta)
   if (buttons['KeyD'])
     controls.moveRight(cameraDelta)
+
+  socket.emit('put', {
+    id: socket.id,
+    payload: {
+      position: {
+        x: player.position.x,
+        y: player.position.y,
+        z: player.position.z,
+      },
+      rotation: {
+        x: player.rotation.x,
+        y: player.rotation.y,
+        z: player.rotation.z,
+      }
+    }
+  })
 }
 
 animate()
